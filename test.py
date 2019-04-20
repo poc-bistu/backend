@@ -28,13 +28,10 @@ def main():
         for j in range(10):
 
             if i == chessX and j != chessY:
-                if board[i, j] == 0:
-                    enableLocationX.append((i, j, ))
-                else:
-                    if j < chessY:
-                        enableLocationX.clear()
-                    elif j > chessY:
-                        enableLocationX.pop(len(enableLocationX))
+                if j < chessY and board[i, j] == 0:
+                    enableLocationX.append((i, j,))
+                elif j < chessY and board[i, j] != 0:
+                    enableLocationX.clear()
 
 
             if j == chessX and i != chessY:

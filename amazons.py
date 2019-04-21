@@ -200,8 +200,9 @@ class Amazons():
         self.__history['movelist'].insert(0, location)
 
         #然后进行胜负的判断
+        playerResult = self.__gameStatus()
 
-        return changedBoard, None
+        return changedBoard, playerResult
 
     # 获取历史信息
 
@@ -214,6 +215,299 @@ class Amazons():
         self.__history = history
 
 
+    # 判断胜负的私有函数
+
+    def __gameStatus(self):
+        reshapeBoard = self.__globalBoard.reshape(self.__height, self.__width)
+        print(reshapeBoard)
+        # 定义玩家A 和 B 四个棋子状态
+        statusA = [True, True, True, True]
+        statusB = [True, True, True, True]
+
+        # 首先判断是否有棋子在四个角上，并汇总双方棋子
+        corner = {'A': None, 'B': None, 'C': None, 'D': None}
+        corner['A'] = reshapeBoard[0, 0]
+        corner['B'] = reshapeBoard[0, 9]
+        corner['C'] = reshapeBoard[9, 9]
+        corner['D'] = reshapeBoard[9, 0]
+        cornerResult = [0, 0, 0]
+        if corner['A'] == 1:
+            cornerResult[0] = reshapeBoard[0, 1]
+            cornerResult[1] = reshapeBoard[1, 0]
+            cornerResult[2] = reshapeBoard[1, 1]
+            if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
+                for i in range(4):
+                    if statusA[i] == True:
+                        statusA[i] = False
+                        break
+        if corner['A'] == 2:
+            cornerResult[0] = reshapeBoard[0, 1]
+            cornerResult[1] = reshapeBoard[1, 0]
+            cornerResult[2] = reshapeBoard[1, 1]
+            if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
+                for i in range(4):
+                    if statusB[i] == True:
+                        statusB[i] = False
+                        break
+
+        if corner['B'] == 1:
+            cornerResult[0] = reshapeBoard[0, 8]
+            cornerResult[1] = reshapeBoard[1, 8]
+            cornerResult[2] = reshapeBoard[1, 9]
+            if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
+                for i in range(4):
+                    if statusA[i] == True:
+                        statusA[i] = False
+                        break
+        if corner['B'] == 2:
+            cornerResult[0] = reshapeBoard[0, 8]
+            cornerResult[1] = reshapeBoard[1, 8]
+            cornerResult[2] = reshapeBoard[1, 9]
+            if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
+                for i in range(4):
+                    if statusB[i] == True:
+                        statusB[i] = False
+                        break
+
+        if corner['C'] == 1:
+            cornerResult[0] = reshapeBoard[8, 9]
+            cornerResult[1] = reshapeBoard[8, 8]
+            cornerResult[2] = reshapeBoard[9, 8]
+            if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
+                for i in range(4):
+                    if statusA[i] == True:
+                        statusA[i] = False
+                        break
+        if corner['C'] == 2:
+            cornerResult[0] = reshapeBoard[8, 9]
+            cornerResult[1] = reshapeBoard[8, 8]
+            cornerResult[2] = reshapeBoard[9, 8]
+            if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
+                for i in range(4):
+                    if statusB[i] == True:
+                        statusB[i] = False
+                        break
+
+        if corner['D'] == 1:
+            cornerResult[0] = reshapeBoard[8, 0]
+            cornerResult[1] = reshapeBoard[8, 1]
+            cornerResult[2] = reshapeBoard[9, 1]
+            if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
+                for i in range(4):
+                    if statusA[i] == True:
+                        statusA[i] = False
+                        break
+        if corner['D'] == 2:
+            cornerResult[0] = reshapeBoard[8, 0]
+            cornerResult[1] = reshapeBoard[8, 1]
+            cornerResult[2] = reshapeBoard[9, 1]
+            if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
+                for i in range(4):
+                    if statusB[i] == True:
+                        statusB[i] = False
+                        break
+
+        # 判断边界点的棋子
+        '''
+            我们规定上边界为A，顺时针顺序为A，B，C，D
+                       A
+                 _____________
+                 |           |
+            D    |           |  B
+                 |           |
+                 |___________|
+                       C
+        '''
+        border = {'A': [], 'B': [], 'C': [], 'D': []}
+        zone = [1, 2, 3, 4, 5, 6, 7, 8]
+
+        for i in zone:
+            border['A'].append(reshapeBoard[0, i])
+        for i in zone:
+            border['B'].append(reshapeBoard[i, 9])
+        for i in zone:
+            border['C'].append(reshapeBoard[9, i])
+        for i in zone:
+            border['D'].append(reshapeBoard[i, 0])
+
+        for i in range(8):
+            # 先从边界A开始
+            keyResult = [0, 0, 0, 0, 0]
+            if border['A'][i] == 1:
+                keyResult[0] = reshapeBoard[0, i]
+                keyResult[1] = reshapeBoard[1, i]
+                keyResult[2] = reshapeBoard[1, i+1]
+                keyResult[3] = reshapeBoard[1, i+2]
+                keyResult[4] = reshapeBoard[0, i+2]
+                if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
+                        and keyResult[3] != 0 and keyResult[4] != 0):
+                    for k in range(4):
+                        if statusA[k] == True:
+                            statusA[k] = False
+                            break
+            if border['A'][i] == 2:
+                keyResult[0] = reshapeBoard[0, i]
+                keyResult[1] = reshapeBoard[1, i]
+                keyResult[2] = reshapeBoard[1, i+1]
+                keyResult[3] = reshapeBoard[1, i+2]
+                keyResult[4] = reshapeBoard[0, i+2]
+                if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
+                        and keyResult[3] != 0 and keyResult[4] != 0):
+                    for k in range(4):
+                        if statusB[k] == True:
+                            statusB[k] = False
+                            break
+
+            # 然后是边界B
+            if border['B'][i] == 1:
+                keyResult[0] = reshapeBoard[i, 9]
+                keyResult[1] = reshapeBoard[i, 8]
+                keyResult[2] = reshapeBoard[i+1, 8]
+                keyResult[3] = reshapeBoard[i+2, 8]
+                keyResult[4] = reshapeBoard[i+2, 9]
+
+                if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
+                        and keyResult[3] != 0 and keyResult[4] != 0):
+                    for k in range(4):
+                        if statusA[k] == True:
+                            statusA[k] = False
+                            break
+            if border['B'][i] == 2:
+                keyResult[0] = reshapeBoard[i, 9]
+                keyResult[1] = reshapeBoard[i, 8]
+                keyResult[2] = reshapeBoard[i+1, 8]
+                keyResult[3] = reshapeBoard[i+2, 8]
+                keyResult[4] = reshapeBoard[i+2, 9]
+                if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
+                        and keyResult[3] != 0 and keyResult[4] != 0):
+                    for k in range(4):
+                        if statusB[k] == True:
+                            statusB[k] = False
+                            break
+
+            # 然后是边界C
+            if border['C'][i] == 1:
+                keyResult[0] = reshapeBoard[9, i]
+                keyResult[1] = reshapeBoard[8, i]
+                keyResult[2] = reshapeBoard[8, i+1]
+                keyResult[3] = reshapeBoard[8, i+2]
+                keyResult[4] = reshapeBoard[9, i+2]
+                if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
+                        and keyResult[3] != 0 and keyResult[4] != 0):
+                    print("GOOD!")
+                    for k in range(4):
+                        if statusA[k] == True:
+                            statusA[k] = False
+                            break
+            if border['C'][i] == 2:
+                keyResult[0] = reshapeBoard[9, i]
+                keyResult[1] = reshapeBoard[8, i]
+                keyResult[2] = reshapeBoard[8, i+1]
+                keyResult[3] = reshapeBoard[8, i+2]
+                keyResult[4] = reshapeBoard[9, i+2]
+                if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
+                        and keyResult[3] != 0 and keyResult[4] != 0):
+                    for k in range(4):
+                        if statusB[k] == True:
+                            statusB[k] = False
+                            break
+
+            # 然后是边界D
+            if border['D'][i] == 1:
+                keyResult[0] = reshapeBoard[i, 0]
+                keyResult[1] = reshapeBoard[i, 1]
+                keyResult[2] = reshapeBoard[i+1, 1]
+                keyResult[3] = reshapeBoard[i+2, 1]
+                keyResult[4] = reshapeBoard[i+2, 0]
+                if(     keyResult[0] != 0 & keyResult[1] != 0 and keyResult[2] != 0
+                        and keyResult[3] != 0 and keyResult[4] != 0):
+                    for k in range(4):
+                        if statusA[k] == True:
+                            statusA[k] = False
+                            break
+            if border['D'][i] == 2:
+                keyResult[0] = reshapeBoard[9, i]
+                keyResult[1] = reshapeBoard[8, i]
+                keyResult[2] = reshapeBoard[8, i+1]
+                keyResult[3] = reshapeBoard[8, i+2]
+                keyResult[4] = reshapeBoard[9, i+2]
+                if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
+                        and keyResult[3] != 0 and keyResult[4] != 0):
+                    for k in range(4):
+                        if statusB[k] == True:
+                            statusB[k] = False
+                            break
+
+            '''
+                下面是除边界以外的全部点
+            '''
+        innerResult = [0, 0, 0, 0, 0, 0, 0, 0]
+        for i in range(8):
+            for j in range(8):
+                # 玩家A的情况
+                if reshapeBoard[i+1, j+1] == 1:
+                    innerResult[0] = reshapeBoard[i, j]
+                    innerResult[1] = reshapeBoard[i, j+1]
+                    innerResult[2] = reshapeBoard[i, j+2]
+                    innerResult[3] = reshapeBoard[i+1, j]
+                    innerResult[4] = reshapeBoard[i+1, j+2]
+                    innerResult[5] = reshapeBoard[i+2, j]
+                    innerResult[6] = reshapeBoard[i+2, j+1]
+                    innerResult[7] = reshapeBoard[i+2, j+2]
+                    if(     innerResult[0] != 0 and innerResult[1] != 0 and innerResult[2] != 0
+                            and innerResult[3] != 0 and innerResult[4] != 0 and innerResult[5] != 0
+                            and innerResult[6] != 0 and innerResult[7] != 0):
+                        for k in range(4):
+                            if statusA[k] == True:
+                                statusA[k] = False
+                                break
+                # 玩家B的情况
+                if reshapeBoard[i+1, j+1] == 2:
+                    innerResult[0] = reshapeBoard[i, j]
+                    innerResult[1] = reshapeBoard[i, j+1]
+                    innerResult[2] = reshapeBoard[i, j+2]
+                    innerResult[3] = reshapeBoard[i+1, j]
+                    innerResult[4] = reshapeBoard[i+1, j+2]
+                    innerResult[5] = reshapeBoard[i+2, j]
+                    innerResult[6] = reshapeBoard[i+2, j+1]
+                    innerResult[7] = reshapeBoard[i+2, j+2]
+                    if(     innerResult[0] != 0 and innerResult[1] != 0 and innerResult[2] != 0
+                            and innerResult[3] != 0 and innerResult[4] != 0 and innerResult[5] != 0
+                            and innerResult[6] != 0 and innerResult[7] != 0):
+                        for k in range(4):
+                            if statusB[k] == True:
+                                statusB[k] = False
+                                break
+        # playerA = True 则为A赢了 PlayerB = True 则为B赢了
+        playerA = False
+        playerB = False
+
+        countA = 0
+        countB = 0
+        for i in statusA:
+            if i == False:
+                countA += 1
+
+        for i in statusB:
+            if i == False:
+                countB += 1
+        if countA == 4:
+            playerB = True
+
+        if countB == 4:
+            playerA = True
+
+        # 开始返回胜利的玩家
+        if playerA == True and playerB == False:
+            return 'A'
+        elif playerB == True and playerB == False:
+            return 'B'
+        elif playerA == True and playerB == True:
+            return 'Tie'
+        elif playerA == False and playerB == False:
+            return None
+
+
 def main():
     board = Amazons(10, 10)
 
@@ -224,7 +518,10 @@ def main():
         itemToX = int(input("toX:"))
         itemToY = int(input("toY:"))
         itemType = int(input("type:"))
-        board.fire(player, {'from': [itemFromX, itemFromY], 'to': [itemToX, itemToY]}, itemType)
+        a = board.fire(player, {'from': [itemFromX, itemFromY], 'to': [itemToX, itemToY]}, itemType)
+        print(a)
+        #board.gameStatus()
+
 
 if __name__ == '__main__':
     main()

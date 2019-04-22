@@ -213,6 +213,7 @@ class Amazons():
 
     def imports(self, history):
         self.__history = history
+        self.__globalBoard = history['boardlist'][0]
 
 
     # 判断胜负的私有函数
@@ -503,10 +504,11 @@ class Amazons():
         elif playerB == True and playerB == False:
             return 'B'
         elif playerA == True and playerB == True:
-            return 'Tie'
+            return 'TIE'
         elif playerA == False and playerB == False:
             return None
 
+'''
 
 def main():
     board = Amazons(10, 10)
@@ -525,3 +527,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+'''

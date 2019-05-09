@@ -7,7 +7,7 @@ import numpy as np
 # 我们规定 4 为后手方障碍 B
 
 
-class Amazons():
+class Amazons(object):
     def __init__(self, width=10, height=10):
         board = np.zeros([height, width], dtype=int)
         # 初始化先手方棋子位置
@@ -314,9 +314,10 @@ class Amazons():
                        A
                  _____________
                  |           |
-            D    |           |  B
+            D    |           |     B
                  |           |
                  |___________|
+                 
                        C
         '''
         border = {'A': [], 'B': [], 'C': [], 'D': []}
@@ -395,7 +396,6 @@ class Amazons():
                 keyResult[4] = reshapeBoard[9, i+2]
                 if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
                         and keyResult[3] != 0 and keyResult[4] != 0):
-                    print("GOOD!")
                     for k in range(4):
                         if statusA[k] == True:
                             statusA[k] = False
@@ -439,9 +439,9 @@ class Amazons():
                             statusB[k] = False
                             break
 
-            '''
-                下面是除边界以外的全部点
-            '''
+        '''
+            下面是除边界以外的全部点
+        '''
         innerResult = [0, 0, 0, 0, 0, 0, 0, 0]
         for i in range(8):
             for j in range(8):
@@ -509,7 +509,6 @@ class Amazons():
             return None
 
 '''
-
 def main():
     board = Amazons(10, 10)
 
@@ -527,4 +526,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
 '''

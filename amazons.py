@@ -1,15 +1,20 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import numpy as np
 
-# 我们规定 0 为没有棋子
-# 我们规定 1 为先手方 A
-# 我们规定 2 为后手方 B
-# 我们规定 3 为先手方障碍 A
-# 我们规定 4 为后手方障碍 B
 
+'''
+我们规定 0 为没有棋子
+我们规定 1 为先手方 A
+我们规定 2 为后手方 B
+我们规定 3 为先手方障碍 A
+我们规定 4 为后手方障碍 B
+'''
 
 class Amazons(object):
-    def __init__(self, width=10, height=10):
-        board = np.zeros([height, width], dtype=int)
+    def __init__(self):
+        board = np.zeros((10, 10), dtype=int)
         # 初始化先手方棋子位置
         board[0, 3] = 1
         board[0, 6] = 1
@@ -21,14 +26,14 @@ class Amazons(object):
         board[9, 6] = 2
         board[6, 9] = 2
         self.__globalBoard = board
-        self.__width = width
-        self.__height = height
+        self.__width = 10
+        self.__height = 10
         self.__history = {'boardlist': [board.reshape(-1)], 'movelist': [{'from': None, 'to': None}]}
 
     # 获取棋盘情况
 
     def getBoard(self):
-        return self.__globalBoard.reshape(-1)
+        return self.__globalBoard.reshape((-1))
         # return self.__globalBoard
 
     # 下棋操作
@@ -40,12 +45,13 @@ class Amazons(object):
         reshapeBoard = self.__globalBoard.reshape(self.__height, self.__width)
 
         # 将 from to 搞出来
-        itemfromV = location['from'][0] - 1
-        itemfromH = location['from'][1] - 1
-        itemtoV = location['to'][0] - 1
-        itemtoH = location['to'][1] - 1
+        itemfromY = location['from'][0] - 1
+        itemfromX = location['from'][1] - 1
+        itemtoY = location['to'][0] - 1
+        itemtoX = location['to'][1] - 1
 
         # Start 下棋规则
+        # todo 检查相应位置是否有棋子，是否是对应用户的棋子
 
         '''
             说明：
@@ -56,119 +62,30 @@ class Amazons(object):
             flag* 是分别在八个方向有阻挡棋子的开始和结束位置
             count* 是统计出当前每个enabelLocation*的成员数量
         '''
-        chessX = itemfromH
-        chessY = itemfromV
-        enableLocationX = []
-        enableLocationY = []
-        enableLocationP = []
-        enableLocationN = []
-        flagX = {'start': None, 'end': None}
-        flagY = {'start': None, 'end': None}
-        flagP = {'start': None, 'end': None}
-        flagN = {'start': None, 'end': None}
+        chessX = itemfromX
+        chessY = itemfromY
         countX, countY, countP, countN = 0, 0, 0, 0
 
         '''
             首先需要用两个for循环，遍历出当前棋子位置，在八个方向上允许下棋的所有位置
             包括中间有格挡棋子的情况
         '''
-        for i in range(10):
-            for j in range(10):
-
-                if i == chessX and j != chessY:
-                    if reshapeBoard[i, j] == 0:
-                        enableLocationX.append((i, j,))
-                        countX += 1
-                    else:
-                        # if j != chessX and i != chessY:
-                        if j < chessY:
-                            flagX['start'] = countX
-                        elif j > chessY:
-                            if flagX['end'] == None:
-                                flagX['end'] = countX
-                if j == chessY and i != chessX:
-                    if reshapeBoard[i, j] == 0:
-                        enableLocationY.append((i, j,))
-                        countY += 1
-                    else:
-                        if i < chessX:
-                            flagY['start'] = countY
-                        elif i > chessX:
-                            if flagY['end'] == None:
-                                flagY['end'] = countY
-                if chessX + chessY == i + j and (chessX != i and chessY != j):
-                    if reshapeBoard[i, j] == 0:
-                        enableLocationP.append((i, j,))
-                        countP += 1
-                    else:
-                        if i < chessX:
-                            flagP['start'] = countP
-                        elif i > chessX:
-                            if flagP['end'] == None:
-                                flagP['end'] = countP
-
-                if chessX - chessY == i - j and (chessX != i and chessY != j):
-                    if reshapeBoard[i, j] == 0:
-                        enableLocationN.append((i, j,))
-                        countN += 1
-                    else:
-                        if i < chessX:
-                            flagN['start'] = countN
-                        elif i > chessX:
-                            if flagN['end'] == None:
-                                flagN['end'] = countN
-        '''
-            通过刚才记录的有棋子的flag标记，开始删除跳过这个棋子的所有位置
-        '''
-        if flagX['end'] != None:
-            for i in range(len(enableLocationX) - flagX['end']):
-                enableLocationX.pop()
-
-        if flagX['start'] != None:
-            if flagX['start'] == 1:
-                flagX['start'] += 1
-            for i in range(flagX['start']):
-                enableLocationX.pop(0)
-
-        if flagY['end'] != None:
-            for i in range(len(enableLocationY) - flagY['end']):
-                enableLocationY.pop()
-
-        if flagY['start'] != None:
-            if flagY['start'] == 1:
-                flagY['start'] += 1
-            for i in range(flagY['start']):
-                enableLocationY.pop(0)
-
-        if flagP['end'] != None:
-            for i in range(len(enableLocationP) - flagP['end']):
-                enableLocationP.pop()
-
-        if flagP['start'] != None:
-            if flagP['start'] == 1:
-                flagP['start'] += 1
-            for i in range(flagP['start']):
-                enableLocationP.pop(0)
-
-        if flagN['end'] != None:
-            for i in range(len(enableLocationN) - flagN['end']):
-                enableLocationN.pop()
-
-        if flagN['start'] != None:
-            if flagN['start'] == 1:
-                flagN['start'] += 1
-            for i in range(flagN['start']):
-                enableLocationN.pop(0)
+        vectors = [(-1, 0), (1, 0), (0, -1),(0,1),(1,1),(-1,-1),(1,-1),(-1,-1)]
 
             # 最后将整个可以放置为位置整合在一个list中
-        enableLocation = enableLocationX + enableLocationY + enableLocationP + enableLocationN
+        enableLocation = []
+
+        for vector in vectors:
+            enableLocation += self.__enabledLocation((chessX, chessY), vector)
         # End 棋盘规则
 
         # 然后判断是否可以放在这个地方
         flag = 0
+
         for (i, j) in enableLocation:
-            if i == itemtoH and j == itemtoV:
+            if i == itemtoX and j == itemtoY:
                 flag = 1
+
                 break
 
         if flag == 0:
@@ -176,18 +93,19 @@ class Amazons(object):
 
 
         # player = A itemtype = 0
+
         if player == 'A' and itemtype == 0:
-            reshapeBoard[itemfromH, itemfromV] = 0
-            reshapeBoard[itemtoH, itemtoV] = 1
+            reshapeBoard[itemfromX, itemfromY] = 0
+            reshapeBoard[itemtoX, itemtoY] = 1
         elif player == 'A' and itemtype == 1:
             # reshapeBoard[itemfromH, itemfromV] = 0
-            reshapeBoard[itemtoH, itemtoV] = 3
+            reshapeBoard[itemtoX, itemtoY] = 3
         elif player == 'B' and itemtype == 0:
-            reshapeBoard[itemfromH, itemfromV] = 0
-            reshapeBoard[itemtoH, itemtoV] = 2
+            reshapeBoard[itemfromX, itemfromY] = 0
+            reshapeBoard[itemtoX, itemtoY] = 2
         elif player == 'B' and itemtype == 1:
             # reshapeBoard[itemfromH, itemfromV] = 0
-            reshapeBoard[itemtoH, itemtoV] = 4
+            reshapeBoard[itemtoX, itemtoY] = 4
         else:
             pass
 
@@ -203,6 +121,34 @@ class Amazons(object):
         playerResult = self.__gameStatus()
 
         return changedBoard, playerResult
+
+
+
+    def __enabledLocation(self, loc, vec):
+        stack = [loc]
+
+        while self.__isAvailable((stack[-1][0] + vec[0], stack[-1][1] + vec[1])):
+            stack.append((stack[-1][0] + vec[0], stack[-1][1] + vec[1]))
+
+        return stack[1:]
+
+    def __isAvailable(self, loc):
+        """
+        判断这个位置是否超出边界，或者有棋子
+        :param loc: tuple: 位置
+        :return: 如果能下，返回真，否则返回假
+        :rtype: bool
+        """
+
+        if loc[0] < 0 or loc[1] < 0:
+            return False
+        elif loc[0] > 9 or loc[1] > 9:
+            return False
+        elif self.__globalBoard[loc] != 0:
+            return False
+        else:
+            return True
+
 
     # 获取历史信息
 
@@ -232,80 +178,101 @@ class Amazons(object):
         corner['C'] = reshapeBoard[9, 9]
         corner['D'] = reshapeBoard[9, 0]
         cornerResult = [0, 0, 0]
+
         if corner['A'] == 1:
             cornerResult[0] = reshapeBoard[0, 1]
             cornerResult[1] = reshapeBoard[1, 0]
             cornerResult[2] = reshapeBoard[1, 1]
+
             if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
                 for i in range(4):
                     if statusA[i] == True:
                         statusA[i] = False
+
                         break
+
         if corner['A'] == 2:
             cornerResult[0] = reshapeBoard[0, 1]
             cornerResult[1] = reshapeBoard[1, 0]
             cornerResult[2] = reshapeBoard[1, 1]
+
             if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
                 for i in range(4):
                     if statusB[i] == True:
                         statusB[i] = False
+
                         break
 
         if corner['B'] == 1:
             cornerResult[0] = reshapeBoard[0, 8]
             cornerResult[1] = reshapeBoard[1, 8]
             cornerResult[2] = reshapeBoard[1, 9]
+
             if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
                 for i in range(4):
                     if statusA[i] == True:
                         statusA[i] = False
+
                         break
+
         if corner['B'] == 2:
             cornerResult[0] = reshapeBoard[0, 8]
             cornerResult[1] = reshapeBoard[1, 8]
             cornerResult[2] = reshapeBoard[1, 9]
+
             if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
                 for i in range(4):
                     if statusB[i] == True:
                         statusB[i] = False
+
                         break
 
         if corner['C'] == 1:
             cornerResult[0] = reshapeBoard[8, 9]
             cornerResult[1] = reshapeBoard[8, 8]
             cornerResult[2] = reshapeBoard[9, 8]
+
             if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
                 for i in range(4):
                     if statusA[i] == True:
                         statusA[i] = False
+
                         break
+
         if corner['C'] == 2:
             cornerResult[0] = reshapeBoard[8, 9]
             cornerResult[1] = reshapeBoard[8, 8]
             cornerResult[2] = reshapeBoard[9, 8]
+
             if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
                 for i in range(4):
                     if statusB[i] == True:
                         statusB[i] = False
+
                         break
 
         if corner['D'] == 1:
             cornerResult[0] = reshapeBoard[8, 0]
             cornerResult[1] = reshapeBoard[8, 1]
             cornerResult[2] = reshapeBoard[9, 1]
+
             if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
                 for i in range(4):
                     if statusA[i] == True:
                         statusA[i] = False
+
                         break
+
         if corner['D'] == 2:
             cornerResult[0] = reshapeBoard[8, 0]
             cornerResult[1] = reshapeBoard[8, 1]
             cornerResult[2] = reshapeBoard[9, 1]
+
             if cornerResult[0] != 0 and cornerResult[1] != 0 and cornerResult[2] != 0:
                 for i in range(4):
                     if statusB[i] == True:
                         statusB[i] = False
+
                         break
 
         # 判断边界点的棋子
@@ -325,42 +292,54 @@ class Amazons(object):
 
         for i in zone:
             border['A'].append(reshapeBoard[0, i])
+
         for i in zone:
             border['B'].append(reshapeBoard[i, 9])
+
         for i in zone:
             border['C'].append(reshapeBoard[9, i])
+
         for i in zone:
             border['D'].append(reshapeBoard[i, 0])
 
         for i in range(8):
             # 先从边界A开始
             keyResult = [0, 0, 0, 0, 0]
+
             if border['A'][i] == 1:
                 keyResult[0] = reshapeBoard[0, i]
                 keyResult[1] = reshapeBoard[1, i]
                 keyResult[2] = reshapeBoard[1, i+1]
                 keyResult[3] = reshapeBoard[1, i+2]
                 keyResult[4] = reshapeBoard[0, i+2]
+
                 if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
                         and keyResult[3] != 0 and keyResult[4] != 0):
+
                     for k in range(4):
                         if statusA[k] == True:
                             statusA[k] = False
+
                             break
+
             if border['A'][i] == 2:
                 keyResult[0] = reshapeBoard[0, i]
                 keyResult[1] = reshapeBoard[1, i]
                 keyResult[2] = reshapeBoard[1, i+1]
                 keyResult[3] = reshapeBoard[1, i+2]
                 keyResult[4] = reshapeBoard[0, i+2]
+
                 if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
                         and keyResult[3] != 0 and keyResult[4] != 0):
+
                     for k in range(4):
                         if statusB[k] == True:
                             statusB[k] = False
+
                             break
 
             # 然后是边界B
+
             if border['B'][i] == 1:
                 keyResult[0] = reshapeBoard[i, 9]
                 keyResult[1] = reshapeBoard[i, 8]
@@ -370,82 +349,106 @@ class Amazons(object):
 
                 if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
                         and keyResult[3] != 0 and keyResult[4] != 0):
+
                     for k in range(4):
                         if statusA[k] == True:
                             statusA[k] = False
+
                             break
+
             if border['B'][i] == 2:
                 keyResult[0] = reshapeBoard[i, 9]
                 keyResult[1] = reshapeBoard[i, 8]
                 keyResult[2] = reshapeBoard[i+1, 8]
                 keyResult[3] = reshapeBoard[i+2, 8]
                 keyResult[4] = reshapeBoard[i+2, 9]
+
                 if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
                         and keyResult[3] != 0 and keyResult[4] != 0):
+
                     for k in range(4):
                         if statusB[k] == True:
                             statusB[k] = False
+
                             break
 
             # 然后是边界C
+
             if border['C'][i] == 1:
                 keyResult[0] = reshapeBoard[9, i]
                 keyResult[1] = reshapeBoard[8, i]
                 keyResult[2] = reshapeBoard[8, i+1]
                 keyResult[3] = reshapeBoard[8, i+2]
                 keyResult[4] = reshapeBoard[9, i+2]
+
                 if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
                         and keyResult[3] != 0 and keyResult[4] != 0):
+
                     for k in range(4):
                         if statusA[k] == True:
                             statusA[k] = False
+
                             break
+
             if border['C'][i] == 2:
                 keyResult[0] = reshapeBoard[9, i]
                 keyResult[1] = reshapeBoard[8, i]
                 keyResult[2] = reshapeBoard[8, i+1]
                 keyResult[3] = reshapeBoard[8, i+2]
                 keyResult[4] = reshapeBoard[9, i+2]
+
                 if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
                         and keyResult[3] != 0 and keyResult[4] != 0):
+
                     for k in range(4):
                         if statusB[k] == True:
                             statusB[k] = False
+
                             break
 
             # 然后是边界D
+
             if border['D'][i] == 1:
                 keyResult[0] = reshapeBoard[i, 0]
                 keyResult[1] = reshapeBoard[i, 1]
                 keyResult[2] = reshapeBoard[i+1, 1]
                 keyResult[3] = reshapeBoard[i+2, 1]
                 keyResult[4] = reshapeBoard[i+2, 0]
+
                 if(     keyResult[0] != 0 & keyResult[1] != 0 and keyResult[2] != 0
                         and keyResult[3] != 0 and keyResult[4] != 0):
+
                     for k in range(4):
                         if statusA[k] == True:
                             statusA[k] = False
+
                             break
+
             if border['D'][i] == 2:
                 keyResult[0] = reshapeBoard[9, i]
                 keyResult[1] = reshapeBoard[8, i]
                 keyResult[2] = reshapeBoard[8, i+1]
                 keyResult[3] = reshapeBoard[8, i+2]
                 keyResult[4] = reshapeBoard[9, i+2]
+
                 if(     keyResult[0] != 0 and keyResult[1] != 0 and keyResult[2] != 0
                         and keyResult[3] != 0 and keyResult[4] != 0):
+
                     for k in range(4):
                         if statusB[k] == True:
                             statusB[k] = False
+
                             break
 
         '''
             下面是除边界以外的全部点
         '''
         innerResult = [0, 0, 0, 0, 0, 0, 0, 0]
+
         for i in range(8):
             for j in range(8):
                 # 玩家A的情况
+
                 if reshapeBoard[i+1, j+1] == 1:
                     innerResult[0] = reshapeBoard[i, j]
                     innerResult[1] = reshapeBoard[i, j+1]
@@ -455,14 +458,18 @@ class Amazons(object):
                     innerResult[5] = reshapeBoard[i+2, j]
                     innerResult[6] = reshapeBoard[i+2, j+1]
                     innerResult[7] = reshapeBoard[i+2, j+2]
+
                     if(     innerResult[0] != 0 and innerResult[1] != 0 and innerResult[2] != 0
                             and innerResult[3] != 0 and innerResult[4] != 0 and innerResult[5] != 0
                             and innerResult[6] != 0 and innerResult[7] != 0):
+
                         for k in range(4):
                             if statusA[k] == True:
                                 statusA[k] = False
+
                                 break
                 # 玩家B的情况
+
                 if reshapeBoard[i+1, j+1] == 2:
                     innerResult[0] = reshapeBoard[i, j]
                     innerResult[1] = reshapeBoard[i, j+1]
@@ -472,12 +479,15 @@ class Amazons(object):
                     innerResult[5] = reshapeBoard[i+2, j]
                     innerResult[6] = reshapeBoard[i+2, j+1]
                     innerResult[7] = reshapeBoard[i+2, j+2]
+
                     if(     innerResult[0] != 0 and innerResult[1] != 0 and innerResult[2] != 0
                             and innerResult[3] != 0 and innerResult[4] != 0 and innerResult[5] != 0
                             and innerResult[6] != 0 and innerResult[7] != 0):
+
                         for k in range(4):
                             if statusB[k] == True:
                                 statusB[k] = False
+
                                 break
         # playerA = True 则为A赢了 PlayerB = True 则为B赢了
         playerA = False
@@ -485,6 +495,7 @@ class Amazons(object):
 
         countA = 0
         countB = 0
+
         for i in statusA:
             if i == False:
                 countA += 1
@@ -492,6 +503,7 @@ class Amazons(object):
         for i in statusB:
             if i == False:
                 countB += 1
+
         if countA == 4:
             playerB = True
 
@@ -499,6 +511,7 @@ class Amazons(object):
             playerA = True
 
         # 开始返回胜利的玩家
+
         if playerA == True and playerB == False:
             return 'A'
         elif playerB == True and playerB == False:
@@ -508,9 +521,8 @@ class Amazons(object):
         elif playerA == False and playerB == False:
             return None
 
-'''
 def main():
-    board = Amazons(10, 10)
+    board = Amazons()
 
     while True:
         player = input("player:")
@@ -526,6 +538,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-'''

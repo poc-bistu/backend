@@ -1,16 +1,23 @@
 import board
 import amazons
 import timer
+import asyncio
+import json
+from Surakarta import Surakarta
 
+get_mesg = lambda x: bytes(str(json.dumps(x)), 'utf-8')
 
 class Room():
-    def __init__(self, boardtype, boardargs, totaltime):
+    def __init__(self, boardtype, boardargs, totaltime, roomId):
 
         # 初始化棋盘，计时器， 玩家列表， 比赛状态
         self.__board = board.Board()
-        self.__timmer = timer.Timer(totaltime)
+        self.__timer = timer.Timer(totaltime)
         self.__status = 0
+        self.roomId = roomId
+        self.type = boardtype
         self.player = []
+        self.history = []
 
         # 根据其中覆盖原棋盘
 
@@ -19,31 +26,20 @@ class Room():
         elif boardtype == 'amazons':
             self.__board = amazons.Amazons(boardargs[0], boardargs[1])
         else:
-            pass
+            self.__board = Surakarta()
 
     # 加入玩家
-    def addplayer(self, player):
-        # 初始化玩家ID列表，支持12个玩家。
-        idList = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L']
+    def addPlayer(self, player, order):
+        if self.type == 'amazons':
+            playerId = 'B' if order == '1' else 'A'
+        elif self.type == 'surakarta':
+            playerId = 1 if order == '1' else -1
 
-        # 初始化搜寻ID
-        playerNum = len(self.player)
-
-        # 通过ID 找寻玩家，这样会更方便一些
-        for searchID in idList:
-            flag = 1
-            for i in range(playerNum):
-                if self.player[i]['id'] == searchID:
-                    flag = 0
-
-            if flag == 1:
-                self.player.append({'id': searchID, 'player': None})
-        '''
-        ⬆️ 上面还缺少玩家这个类的实例。
-        '''
+        self.player.append({'id': playerId, 'player': player, 'order': order})
+        return playerId
 
     # 删除玩家
-    def removeplayer(self, id):
+    def removePlayer(self, id):
         playerNum = len(self.player)
         for i in range(playerNum):
             if self.player[i]['id'] == id:
@@ -52,21 +48,43 @@ class Room():
         return 1
 
     # 开始游戏，并开始计时
-    def start(self):
-        self.__status = 1
-        pass
+    async def start(self, playerId):
+        self.__status += 1
+        if self.__status >= 2:
+            mesg = {'mesg': 'start'}
+            await self.notifyToAll(mesg)
+        else:
+            mesg = {'mesg': 'ready'}
+            await self.notifyToOther(playerId, mesg)
+
+    async def rollback(self):
+        board = self.__board.rollback()
+        await self.notifyToAll({'mesg': 'rollback', 'board': board})
 
     # 获取比赛状态
     def status(self):
         return {'status': self.__status, 'message': None}
 
     # 移动棋子
-    def move(self, player, location, *kw):
-        return self.__board.fire(player, location, *kw)
+    async def move(self, player, location, *kw):
+        board, result = self.__board.fire(player, location, *kw)
+        self.history.append(board)
+        await self.notifyToOther(player, {'mesg': 'move', 'move': location, 'player': player, 'result': result, 'kw': kw[0]})
 
+    async def notifyToOther(self, playerId, mesg):
+        for i in self.player:
+            if i['id'] != playerId:
+                await i['player'].send(get_mesg(mesg))
 
+    async def notifyToAll(self, mesg):
+        for i in self.player:
+            await i['player'].send(get_mesg(mesg))
 
-
+    def getOrder(self):
+        if self.player[0]['order'] == '1':
+            return '2'
+        else:
+            return '1'
 
 
 

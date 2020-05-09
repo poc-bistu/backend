@@ -19,7 +19,7 @@ class Room():
         self.player = []
         self.history = []
 
-        # 根据其中覆盖原棋盘
+        # 根据棋种覆盖原棋盘
 
         if boardtype == None:
             pass
@@ -70,16 +70,19 @@ class Room():
         board, result = self.__board.fire(player, location, *kw)
         self.history.append(board)
         await self.notifyToOther(player, {'mesg': 'move', 'move': location, 'player': player, 'result': result, 'kw': kw[0]})
-
+    
+    # 通知另一方玩家
     async def notifyToOther(self, playerId, mesg):
         for i in self.player:
             if i['id'] != playerId:
                 await i['player'].send(get_mesg(mesg))
 
+    # 通知所有玩家
     async def notifyToAll(self, mesg):
         for i in self.player:
             await i['player'].send(get_mesg(mesg))
 
+    # 先后手次序
     def getOrder(self):
         if self.player[0]['order'] == '1':
             return '2'
